@@ -15,7 +15,8 @@ import android.widget.TextView;
 public class GameRoom extends Activity {
 	private TextView txtroomname,txtpopulation;
 	private SharedPreferences preference;
-	private String readroomname,readpopulation;
+	private String readroomname;
+	private int readpopulation;
 	
 	//清單+人物列表
 
@@ -32,10 +33,10 @@ public class GameRoom extends Activity {
 		preference=getSharedPreferences("creatroom",MODE_PRIVATE);
 		//拿資料
 		readroomname=preference.getString("roomname","unknown");
-		readpopulation=preference.getString("population", "unknown");
+		readpopulation=preference.getInt("population", 0);
 		//顯示
 		txtroomname.setText(readroomname);	
-		txtpopulation.setText(readpopulation);
+		txtpopulation.setText(String.valueOf(readpopulation));
 		
 		//先直接開始~~
 		new AlertDialog.Builder(GameRoom.this)

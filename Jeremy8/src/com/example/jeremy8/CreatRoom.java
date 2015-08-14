@@ -60,7 +60,7 @@ public class CreatRoom extends Activity {
 		super.onStop();
 			preference.edit()
 			.putString("roomname",edtroomname.getText().toString())
-			.putString("population", edtpopulation.getText().toString())		
+			.putInt("population", Integer.parseInt(edtpopulation.getText().toString()))		
 			.commit();
 	}
 

@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -21,20 +23,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class Guess extends Activity {
-	private SharedPreferences preference;
+	private SharedPreferences preference, MAXpre;
 	private EditText edtguess;
-	private TextView mTextView;//�˼ƭp��
-	private int i;
+	private TextView mTextView;//倒數計時
+	private int i, MAX;
 
 	//
 	private ImageView iv;
 	private Bitmap baseBitmap;
 	private Canvas canvas;
 	private Paint paint;
-	private TextView txtAns;
-	private String readAns;
+	public int coordinates[];  // <--------------- 接收資料存放處
 	
-	String file;
+	String file = MAXpre.getString("roomname", "unknown");  // <------ 房間名稱+self
 	String FILENAME = file+".json";
 	ArrayList<Integer> gameArray;
 	//
@@ -50,10 +51,35 @@ public class Guess extends Activity {
 		
 		
 		
-		//���o��������
+		//取得介面元件
 		edtguess=(EditText)findViewById(R.id.editText6);
 		
 		preference=getSharedPreferences("guess",MODE_PRIVATE);
+		MAXpre=getSharedPreferences("creatroom",MODE_PRIVATE);
+		MAX = MAXpre.getInt("population", 0);
+		
+		
+		this.iv = (ImageView) this.findViewById(R.id.imageView3);
+		// 创建一张空白图片
+		baseBitmap = Bitmap.createBitmap(480, 640, Bitmap.Config.ARGB_8888);
+		// 创建一张画布
+		canvas = new Canvas(baseBitmap);
+		// 画布背景为白色
+		canvas.drawColor(Color.WHITE);
+		// 创建画笔
+		paint = new Paint();
+		// 画笔颜色为黑色
+		paint.setColor(Color.BLACK);
+		// 宽度5个像素
+		paint.setStrokeWidth(5);
+		// 先将灰色背景画上
+		canvas.drawBitmap(baseBitmap, new Matrix(), paint);
+		iv.setImageBitmap(baseBitmap);
+		
+		for(int j = 0; j < coordinates.length; j+=4)
+		{
+			canvas.drawLine(coordinates[j], coordinates[j+1], coordinates[j+2], coordinates[j+3], paint); 
+		}
 		
 		try{
 			 FileOutputStream out = openFileOutput(FILENAME, MODE_WORLD_READABLE);
@@ -61,20 +87,30 @@ public class Guess extends Activity {
 			 final JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 	    writer.setIndent("  ");
 		writer.beginObject();
-	    writer.beginArray();
+	    
+		//--------- round ---------
 	    writer.name("round");
+	    writer.beginArray();
 	    writer.value(i);
+	    writer.endArray();
+	    
+	    //---------- target --------
 	    writer.name("target");
-	    if(self == MAX)  // <------ �n���oself�ܼƤΤH��-�qLISTVIEW��
+	    writer.beginArray();
+	    if(self == MAX)  // <------ 要取得self變數及人數-從LISTVIEW取
 		 {
 			 writer.value(0);
 		 }
 		 else
 		 {
-		 writer.value(self+1); // <------ �n���oself�ܼ�-�qLISTVIEW��
+		 writer.value(self+1); // <------ 要取得self變數-從LISTVIEW取
 		 }
+	    writer.endArray();
+	    
+	    //----------- title ----------
 		writer.name("title");
-		writer.value(edtguess.getText().toString());  // <----- �令�D���ܼ�
+		writer.beginArray();
+		writer.value(edtguess.getText().toString());  // <----- 改成題目變數
 		writer.endArray();
 		writer.endObject();
 		writer.flush();
@@ -83,12 +119,12 @@ public class Guess extends Activity {
 			  Log.e("log_tag", "Error saving string "+e.toString());
 			  }
 		
-		//�˼ƭp��
+		//倒數計時
 		time();
 	}
 	
 	public void time(){	
-		// �˼ƭp��     
+		// 倒數計時     
 		mTextView = (TextView)findViewById(R.id.timeView3);
 		new CountDownTimer(5000,1000){
 		            
@@ -96,7 +132,7 @@ public class Guess extends Activity {
 			public void onFinish() {
 			// TODO Auto-generated method stub
 				mTextView.setText("Time is up");
-				//����~��
+				//跳轉業面
 				if(i+1>7){
 					Intent intent2=new Intent();
 					intent2.setClass(Guess.this,EndGame.class);
@@ -120,7 +156,7 @@ public class Guess extends Activity {
 			}.start();
 		}
 	
-	//�x�s���(�ϥΪ̦W��)
+	//儲存資料(使用者名稱)
 	protected void onStop(){
 		super.onStop();
 			preference.edit()

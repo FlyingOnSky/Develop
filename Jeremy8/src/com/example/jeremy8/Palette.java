@@ -31,13 +31,13 @@ public class Palette extends Activity {
 	private Canvas canvas;
 	private Paint paint;
 	private TextView txtAns;
-	private SharedPreferences preference;
+	private SharedPreferences preference, MAXpre;
 	private String readAns;
 	private TextView mTextView;//倒數計時
-	private int i;
+	private int i, MAX;
 	
 	//任軒-json檔名-從LISTVIEW拿
-	String file;
+	String file = MAXpre.getString("roomname", "unknown");
 	String FILENAME = file+".json";
 	public ArrayList<Integer> coordinate; 
 
@@ -55,8 +55,11 @@ public class Palette extends Activity {
 		
 		//尋找儲存檔
 		preference=getSharedPreferences("ans",MODE_PRIVATE);
+		MAXpre=getSharedPreferences("creatroom",MODE_PRIVATE);
 		//拿資料
 	    readAns=preference.getString("data","unknown");
+		MAX = MAXpre.getInt("population", 0);
+	    
 		//顯示
 		txtAns.setText(readAns);
 		
@@ -87,8 +90,10 @@ public class Palette extends Activity {
 			 writer.setIndent("  ");
 			 
 			 writer.beginObject();
-			 writer.beginArray();
+			 
+			 //---------- target ---------
 			 writer.name("target");
+			 writer.beginArray();
 			 if(self == MAX)  // <------ 要取得self變數及人數-從LISTVIEW取
 			 {
 				 writer.value(0);
@@ -97,14 +102,17 @@ public class Palette extends Activity {
 			 {
 			 writer.value(self+1); // <------ 要取得self變數及人數
 			 }
-	//		 writer.endArray();
-	//		 writer.beginArray();
+			 writer.endArray();
+			
+			 //--------  round  --------
 			 writer.name("round");
+			 writer.beginArray();
 			 writer.value(i);  //  <------ 要取得round變數
-	//		 writer.endArray();
-	//	     writer.beginArray();
-		     writer.name("coordinates");
-		
+			 writer.endArray();
+		     
+			 //--------- coordinates ----------
+			 writer.name("coordinates");
+			 writer.beginArray();
 		
 		iv.setOnTouchListener(new OnTouchListener() { 
 			  int startX; 

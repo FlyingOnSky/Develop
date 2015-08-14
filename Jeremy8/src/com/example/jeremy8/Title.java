@@ -19,11 +19,11 @@ import android.widget.TextView;
 
 public class Title extends Activity {
 	private EditText edttitle;
-	private SharedPreferences preference;
+	private SharedPreferences preference, MAXpre;
 	private TextView mTextView;//计璸
 	private int i=1;
 	//ヴ癮-json郎-眖LISTVIEW
-	String file;
+	String file = MAXpre.getString("roomname", "unknown");;;
 	String FILENAME = file+".json";
 
 	@Override
@@ -38,6 +38,8 @@ public class Title extends Activity {
 		
 		//ミ纗郎
 		preference=getSharedPreferences("ans",MODE_PRIVATE);
+		MAXpre = getSharedPreferences("creatroom",MODE_PRIVATE);
+		int MAX = MAXpre.getInt("population", 0);
 		
 		//计璸
 		time();
@@ -50,9 +52,32 @@ public class Title extends Activity {
 		  JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
 		  writer.setIndent("  ");
 		  writer.beginObject();
+		  
+		  //------------ round ----------
+		  writer.name("round");
 		  writer.beginArray();
-		  writer.name("round").value(i);
+		  writer.value(i);
 		  writer.endArray();
+		  
+		  //-------------- title ---------
+		  writer.name("title");
+		  writer.beginArray();
+		  writer.value(edttitle.getText().toString());
+		  writer.endArray();
+		  
+		  //------------ target --------------
+		  writer.name("target");
+			 writer.beginArray();
+			 if(self == MAX)  // <------ 璶眔self跑计の计-眖LISTVIEW
+			 {
+				 writer.value(0);
+			 }
+			 else
+			 {
+			 writer.value(self+1); // <------ 璶眔self跑计の计
+			 }
+			 writer.endArray();
+			 
 		  writer.endObject();
 		  writer.flush();
 		  writer.close();
